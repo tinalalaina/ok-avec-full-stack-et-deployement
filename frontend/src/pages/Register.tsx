@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -28,8 +29,17 @@ const Register = () => {
         role,
       })
       navigate('/login')
-    } catch {
-      setMessage('Inscription échouée. Merci de réessayer.')
+    } catch (error) {
+      const apiError = error as AxiosError<Record<string, string[] | string>>
+      const data = apiError.response?.data
+      const detail =
+        (typeof data?.detail === 'string' && data.detail) ||
+        (typeof data?.email === 'string' && data.email) ||
+        (Array.isArray(data?.email) && data.email[0]) ||
+        (typeof data?.password_confirm === 'string' && data.password_confirm) ||
+        (Array.isArray(data?.password_confirm) && data.password_confirm[0])
+
+      setMessage(detail || 'Inscription échouée. Merci de réessayer.')
     }
   }
 
