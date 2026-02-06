@@ -32,12 +32,35 @@ const Register = () => {
     } catch (error) {
       const apiError = error as AxiosError<Record<string, string[] | string>>
       const data = apiError.response?.data
-      const detail =
-        (typeof data?.detail === 'string' && data.detail) ||
-        (typeof data?.email === 'string' && data.email) ||
-        (Array.isArray(data?.email) && data.email[0]) ||
-        (typeof data?.password_confirm === 'string' && data.password_confirm) ||
-        (Array.isArray(data?.password_confirm) && data.password_confirm[0])
+
+      const priorityFields = ['detail', 'email', 'password', 'password_confirm', 'role']
+      let detail: string | undefined
+
+      for (const field of priorityFields) {
+        const value = data?.[field]
+        if (typeof value === 'string' && value.trim()) {
+          detail = value
+          break
+        }
+        if (Array.isArray(value) && typeof value[0] === 'string' && value[0].trim()) {
+          detail = value[0]
+          break
+        }
+      }
+
+      if (!detail && data) {
+        const firstError = Object.values(data).find(
+          (value) =>
+            (typeof value === 'string' && value.trim().length > 0) ||
+            (Array.isArray(value) && typeof value[0] === 'string' && value[0].trim().length > 0),
+        )
+
+        if (typeof firstError === 'string') {
+          detail = firstError
+        } else if (Array.isArray(firstError) && typeof firstError[0] === 'string') {
+          detail = firstError[0]
+        }
+      }
 
       setMessage(detail || 'Inscription échouée. Merci de réessayer.')
     }
