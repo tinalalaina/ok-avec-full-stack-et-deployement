@@ -21,6 +21,16 @@ def env_bool(name: str, default: str = "False") -> bool:
     return env(name, default).lower() in {"1", "true", "yes", "on"}
 
 
+def parse_origins(value: str) -> list[str]:
+    """Parse une liste d'origines séparées par des virgules (sans slash final)."""
+    origins: list[str] = []
+    for origin in value.split(","):
+        cleaned_origin = origin.strip().rstrip("/")
+        if cleaned_origin:
+            origins.append(cleaned_origin)
+    return origins
+
+
 SECRET_KEY = env("SECRET_KEY", "django-insecure-agriculture-secret-2025")
 DEBUG = env_bool("DEBUG", "False")
 
@@ -155,21 +165,13 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = env_bool("CORS_ALLOW_ALL_ORIGINS", "False")
-CORS_ALLOWED_ORIGINS = [
-    origin.strip()
-    for origin in env("CORS_ALLOWED_ORIGINS", "").split(",")
-    if origin.strip()
-]
+CORS_ALLOWED_ORIGINS = parse_origins(env("CORS_ALLOWED_ORIGINS", ""))
 CORS_ALLOW_CREDENTIALS = env_bool("CORS_ALLOW_CREDENTIALS", "False")
 
-CSRF_TRUSTED_ORIGINS = [
-    origin.strip()
-    for origin in env("CSRF_TRUSTED_ORIGINS", "").split(",")
-    if origin.strip()
-]
+CSRF_TRUSTED_ORIGINS = parse_origins(env("CSRF_TRUSTED_ORIGINS", ""))
 
 # Fallback utile en déploiement si les variables CORS/CSRF n'ont pas encore été définies.
-default_frontend_url = env("FRONTEND_URL", "https://ok-avec-full-stack-et-deployement.pages.dev")
+default_frontend_url = env("FRONTEND_URL", "https://ok-avec-full-stack-et-deployement.pages.dev").rstrip("/")
 if default_frontend_url and not CORS_ALLOW_ALL_ORIGINS:
     if not CORS_ALLOWED_ORIGINS:
         CORS_ALLOWED_ORIGINS = [default_frontend_url]
