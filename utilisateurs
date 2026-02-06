@@ -6,6 +6,7 @@ http://localhost:8000/api/users/register-with-otp/
   "password_confirm": "123456789",
   "first_name": "sepolo",
   "last_name": "yixolo",
+
   "phone": "03333333333",
   "role": "CLIENT"
 }
