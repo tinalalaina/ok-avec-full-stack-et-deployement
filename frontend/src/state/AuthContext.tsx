@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(info)
       setError(null)
       return info
-    } catch (err) {
+    } catch {
       setUser(null)
       setError('Impossible de charger le profil.')
       return null
@@ -74,9 +74,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           navigate('/dashboard/client', { replace: true })
         }
-      } catch (err) {
+      } catch (error) {
         setError('Identifiants invalides. Merci de réessayer.')
-        throw err
+        throw error
       } finally {
         setIsLoading(false)
       }
@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = useCallback(async () => {
     try {
       await logoutRequest()
-    } catch (err) {
+    } catch {
       // ignore API errors on logout
     } finally {
       localStorage.removeItem('access_token')

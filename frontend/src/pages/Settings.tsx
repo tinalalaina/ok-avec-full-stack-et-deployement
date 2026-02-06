@@ -25,7 +25,7 @@ const Settings = () => {
       try {
         const data = await fetchProfile(user.id)
         setProfile(data)
-      } catch (err) {
+      } catch {
         setMessage('Impossible de charger le profil.')
       } finally {
         setLoading(false)
@@ -82,7 +82,7 @@ const Settings = () => {
       setProfile(updated)
       await refreshUser()
       setMessage('Profil mis à jour.')
-    } catch (err) {
+    } catch {
       setMessage('Mise à jour échouée.')
     }
   }
