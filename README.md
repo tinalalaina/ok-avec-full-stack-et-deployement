@@ -44,10 +44,12 @@ Il est pensé pour être copié/collé et adapté à un nouveau projet.
 - Créer `backend/.env.example` (sans secrets) :
   - `SECRET_KEY=...`
   - `DEBUG=False`
-  - `DB_*`
+  - `DB_*` (+ `DB_SSLMODE=require` pour Render)
+  - `FRONTEND_URL=https://ok-avec-full-stack-et-deployement.pages.dev`
   - `CORS_*`
   - `CSRF_TRUSTED_ORIGINS`
   - `EMAIL_*`
+- Copier ensuite ce fichier en `backend/.env` et adapter les valeurs avant le déploiement (ne jamais commiter les secrets réels).
 
 ---
 

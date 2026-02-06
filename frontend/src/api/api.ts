@@ -1,7 +1,11 @@
-
 import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000/api'
+const DEFAULT_DEV_API_URL = 'http://127.0.0.1:8000/api'
+const DEFAULT_PROD_API_URL = 'https://ok-avec-full-stack-et-deployement.onrender.com/api'
+
+const fallbackApiUrl = import.meta.env.DEV ? DEFAULT_DEV_API_URL : DEFAULT_PROD_API_URL
+const rawBaseUrl = (import.meta.env.VITE_API_URL ?? fallbackApiUrl).trim()
+const BASE_URL = rawBaseUrl.replace(/\/+$/, '')
 
 const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,

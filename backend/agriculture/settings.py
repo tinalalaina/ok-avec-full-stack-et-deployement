@@ -1,14 +1,28 @@
 import os
-from pathlib import Path
 from datetime import timedelta
-from dotenv import load_dotenv
+from pathlib import Path
+from urllib.parse import parse_qs, unquote, urlparse
 
-load_dotenv()
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-agriculture-secret-2025")
-DEBUG = os.getenv("DEBUG", "False") == "True"
+# Charge d'abord backend/.env, puis garde la compatibilité avec l'ancien backend/env.
+load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / "env")
+
+
+def env(name: str, default: str = "") -> str:
+    """Récupère une variable d'environnement en retirant les espaces parasites."""
+    return os.getenv(name, default).strip()
+
+
+def env_bool(name: str, default: str = "False") -> bool:
+    return env(name, default).lower() in {"1", "true", "yes", "on"}
+
+
+SECRET_KEY = env("SECRET_KEY", "django-insecure-agriculture-secret-2025")
+DEBUG = env_bool("DEBUG", "False")
 
 ALLOWED_HOSTS = ["*"]
 
@@ -20,15 +34,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # third-party
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_yasg",
     "corsheaders",
-
     # local
-     "users.apps.UsersConfig",
+    "users.apps.UsersConfig",
 ]
 
 MIDDLEWARE = [
@@ -64,16 +76,39 @@ TEMPLATES = [
 WSGI_APPLICATION = "agriculture.wsgi.application"
 ASGI_APPLICATION = "agriculture.asgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME", "agriculture"),
-        "USER": os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASS", "lalaina14"),
-        "HOST": os.getenv("DB_HOST", "localhost"),
-        "PORT": os.getenv("DB_PORT", "5432"),
+sslmode = env("DB_SSLMODE", "require")
+database_url = env("DATABASE_URL")
+if database_url:
+    parsed_url = urlparse(database_url)
+    query = parse_qs(parsed_url.query)
+    sslmode = query.get("sslmode", [sslmode])[0]
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": parsed_url.path.lstrip("/"),
+            "USER": unquote(parsed_url.username or ""),
+            "PASSWORD": unquote(parsed_url.password or ""),
+            "HOST": parsed_url.hostname,
+            "PORT": str(parsed_url.port or "5432"),
+            "OPTIONS": {
+                "sslmode": sslmode,
+            },
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("DB_NAME", "agriculture"),
+            "USER": env("DB_USER", "postgres"),
+            "PASSWORD": env("DB_PASS", ""),
+            "HOST": env("DB_HOST", "localhost"),
+            "PORT": env("DB_PORT", "5432"),
+            "OPTIONS": {
+                "sslmode": sslmode,
+            },
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -96,10 +131,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ✅ Custom User
 AUTH_USER_MODEL = "users.User"
 
-# ✅ DRF + JWT
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [],
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -121,29 +154,35 @@ SIMPLE_JWT = {
     "TOKEN_TYPE_CLAIM": "token_type",
 }
 
-# ✅ CORS (si besoin)
-CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "False") == "True"
+CORS_ALLOW_ALL_ORIGINS = env_bool("CORS_ALLOW_ALL_ORIGINS", "False")
 CORS_ALLOWED_ORIGINS = [
     origin.strip()
-    for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+    for origin in env("CORS_ALLOWED_ORIGINS", "").split(",")
     if origin.strip()
 ]
-CORS_ALLOW_CREDENTIALS = os.getenv("CORS_ALLOW_CREDENTIALS", "False") == "True"
+CORS_ALLOW_CREDENTIALS = env_bool("CORS_ALLOW_CREDENTIALS", "False")
 
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
-    for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    for origin in env("CSRF_TRUSTED_ORIGINS", "").split(",")
     if origin.strip()
 ]
 
-# ✅ Email (mets tes variables .env)
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
-EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
+# Fallback utile en déploiement si les variables CORS/CSRF n'ont pas encore été définies.
+default_frontend_url = env("FRONTEND_URL", "https://ok-avec-full-stack-et-deployement.pages.dev")
+if default_frontend_url and not CORS_ALLOW_ALL_ORIGINS:
+    if not CORS_ALLOWED_ORIGINS:
+        CORS_ALLOWED_ORIGINS = [default_frontend_url]
+    if not CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS = [default_frontend_url]
+
+EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(env("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", "True")
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", "False")
 
 APPEND_SLASH = False
 
