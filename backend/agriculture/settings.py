@@ -1,5 +1,4 @@
 import os
-import sys
 from datetime import timedelta
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
@@ -8,10 +7,9 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-RUNNING_TESTS = "test" in sys.argv
-
-# Charge uniquement backend/.env pour éviter d'utiliser des secrets legacy versionnés.
+# Charge d'abord backend/.env, puis garde la compatibilité avec l'ancien backend/env.
 load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / "env")
 
 
 def env(name: str, default: str = "") -> str:
@@ -33,14 +31,10 @@ def parse_origins(value: str) -> list[str]:
     return origins
 
 
-def parse_csv(value: str) -> list[str]:
-    return [item.strip() for item in value.split(",") if item.strip()]
-
-
 SECRET_KEY = env("SECRET_KEY", "django-insecure-agriculture-secret-2025")
 DEBUG = env_bool("DEBUG", "False")
 
-ALLOWED_HOSTS = parse_csv(env("ALLOWED_HOSTS", "localhost,127.0.0.1"))
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     # django
@@ -94,24 +88,7 @@ ASGI_APPLICATION = "agriculture.asgi.application"
 
 sslmode = env("DB_SSLMODE", "require")
 database_url = env("DATABASE_URL")
-use_sqlite = env_bool("USE_SQLITE", "False")
-
-if use_sqlite:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": str(BASE_DIR / "db.sqlite3"),
-        }
-    }
-elif database_url and database_url.startswith("sqlite"):
-    sqlite_path = database_url.replace("sqlite:///", "", 1).strip()
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": sqlite_path or str(BASE_DIR / "db.sqlite3"),
-        }
-    }
-elif database_url:
+if database_url:
     parsed_url = urlparse(database_url)
     query = parse_qs(parsed_url.query)
     sslmode = query.get("sslmode", [sslmode])[0]
@@ -208,14 +185,6 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", "True")
 EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", "False")
-
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", "True" if not DEBUG and not RUNNING_TESTS else "False")
-SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", "True" if not DEBUG and not RUNNING_TESTS else "False")
-CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", "True" if not DEBUG and not RUNNING_TESTS else "False")
-SECURE_HSTS_SECONDS = int(env("SECURE_HSTS_SECONDS", "31536000" if not DEBUG and not RUNNING_TESTS else "0"))
-SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", "True" if not DEBUG and not RUNNING_TESTS else "False")
-SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", "True" if not DEBUG and not RUNNING_TESTS else "False")
 
 APPEND_SLASH = False
 

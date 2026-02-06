@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios'
 import api from './api'
 import type { UserInfo, UserProfile } from '../types/user'
 
@@ -26,17 +25,8 @@ export interface RegisterResponse {
 }
 
 export const register = async (payload: RegisterPayload) => {
-  try {
-    const { data } = await api.post<RegisterResponse>('/users/register/', payload)
-    return data
-  } catch (error) {
-    const axiosError = error as AxiosError
-    if (axiosError.response?.status === 404) {
-      const { data } = await api.post<RegisterResponse>('/users/regiter/', payload)
-      return data
-    }
-    throw error
-  }
+  const { data } = await api.post<RegisterResponse>('/users/register/', payload)
+  return data
 }
 
 export const login = async (payload: LoginPayload) => {

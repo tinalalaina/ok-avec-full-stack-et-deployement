@@ -15,7 +15,7 @@ const Login = () => {
     setMessage(null)
     try {
       await login(email, password)
-    } catch {
+    } catch (err) {
       setMessage('Connexion impossible. Vérifiez vos informations.')
     }
   }
