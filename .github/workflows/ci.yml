@@ -59,6 +59,11 @@ jobs:
 
   security-scan:
     runs-on: ubuntu-latest
+    env:
+      # Use AWS Public ECR mirrors to avoid intermittent GHCR rate-limit failures
+      # when Trivy downloads vulnerability databases in GitHub Actions.
+      TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2
+      TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db:1
     steps:
       - uses: actions/checkout@v4
 
