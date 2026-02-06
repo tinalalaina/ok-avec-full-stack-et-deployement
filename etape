@@ -1,0 +1,95 @@
+https://websocket-djo.pages.dev/ =>FRONTEND cloudflare (lalainaraky14@gmail.com)
+https://websocket-vp66.onrender.com/swagger/ => backend render (tinalalaina14@gmail.com)
+github utiliser ;devworkshop26-web
+
+
+-----------------
+git clone 
+ls
+cd backend
+source .venv/bin/activate
+ajout .env
+python manage.py runserver
+
+cd ..
+cd frontend
+npm install
+npm run dev
+------------------
+apliquer sur mon github tinalalaina
+git clone et push de github devworkshop26
+remarque
+apres le push 
+dans actions workfow run: ok avec package: ok-avec-full-stack-et-deployement-backend
+seconde etape:
+cloudflare et render
+ici avec cloudflare on ne peut pas utiiser avec notre github alors
+on va utiliser un autre email: tinalalaina14@gmail.com connecter avec github
+
+
+               cloudflare.com   email: tinalalaina14@gmail.com connecter avec github 
+
+frontend:
+clique sur 
+computer & ai => workers & pages => create application => Looking to deploy Pages? Get started => clique sur get startedd => import an existing git repository => deploy a site from your account (connect github) => confirm access => il va te diriger vers ton github est tu vois "cloudflare workers and pages" : laisse all repositories (ou ony select repositories ici on a choisir only slect et choisi websocket)=> clique save => l’accès est bien enregistré, mais il faut cliquer de nouveau sur “Connect GitHub” pour que la liste des repos se charge.=>   Clique Connect GitHub (au milieu de la page).=> Si on te demande de choisir un compte GitHub → sélectionne devworkshop26-web.=>Tu verras une liste de repos → choisis websocket.=>Tu verras enfin le formulaire Root directory.
+
+framework preset: choix de votre travaille ex react(vite)
+Build command : npm ci && npm run build
+Build output directory: dist
+Root directory : frontend (note ici dans le github il y a le full stack frontend et backend avec d'autre fichier)
+save and deploy sinon si render est pret on peut ajouter environment variables
+
+une fois que save and deploy il va fire le deployement ici on a success!
+et propose un lien : 
+
+                ok-avec-full-stack-et-deployement.pages.dev
+
+voila il est deployer le frontend
+--
+
+render: tinalalaina14@gmail.com
+
+
+Projects
+My project=> clique => create new service => postgres =>
+Name: raky (A unique name for your Postgres instance.)
+project: rien on ne peut pas le toucher
+Database: mondb
+user: lalaina
+region: shoisis on a laisser par defaut
+postgresql: 18
+datadog api key: vide
+datadog region:par defaut
+
+create
+
+il va te donner
+hostname: dpg-d61kavbuibrs73e0d7vg-a
+port: 5432
+database: mondb
+username: lalaina
+password: FSJhZWd30p4eEp5GPtyc02ujvYHJlSPa
+Internal Database URL: postgresql://lalaina:FSJhZWd30p4eEp5GPtyc02ujvYHJlSPa@dpg-d61kavbuibrs73e0d7vg-a/mondb
+External Database URL: postgresql://lalaina:FSJhZWd30p4eEp5GPtyc02ujvYHJlSPa@dpg-d61kavbuibrs73e0d7vg-a.oregon-postgres.render.com/mondb
+PSQL Command: PGPASSWORD=FSJhZWd30p4eEp5GPtyc02ujvYHJlSPa psql -h dpg-d61kavbuibrs73e0d7vg-a.oregon-postgres.render.com -U lalaina mondb
+
+sur le premier page:
+projects: clique ton projet=> new service => web service =>public git repository => va sur ton github=> ex: https://github.com/tinalalaina/ok-avec-full-stack-et-deployement
+=>connect => Root Directory → mets : backend car dans ton github il y a plusieur fichier ici full stack =>ici on a choisi : docker
+
+1) Dans ton Web Service Render → Environment
+
+Ajoute ces variables (copie/colle) :
+
+    DB_NAME = mondb
+    DB_USER = lalaina
+    DB_PASS = FSJhZWd30p4eEp5GPtyc02ujvYHJlSPa
+    DB_HOST = dpg-d61kavbuibrs73e0d7vg-a.oregon-postgres.render.com (Utilisez le host externe)
+    DB_PORT = 5432
+
+save and build
+
+ok ca va marcher maintenant meme le swagger
+
+note apres la modification de backend et le push vas sur render clique ton projet=>clique ton backend conforme au gihtub =>sur manual deployement choisi deploy last commit 
+
