@@ -18,6 +18,19 @@ Il est pensé pour être copié/collé et adapté à un nouveau projet.
 
 ---
 
+
+### Initialiser automatiquement les `.env`
+
+Pour créer `backend/.env` et `frontend/.env` depuis les fichiers `.env.example`:
+
+```bash
+./scripts/bootstrap_env.sh
+```
+
+Le script génère aussi automatiquement une `SECRET_KEY` si elle vaut encore `change-me`.
+
+---
+
 ### 2) Frontend (React + Vite)
 
 - Créer le frontend :
