@@ -25,6 +25,10 @@ VITE_API_URL=https://ok-avec-full-stack-et-deployement.onrender.com/api
 ```
 
 
+## CI (GitHub Actions)
+
+Le workflow `frontend-ci.yml` valide le build frontend sur chaque `pull_request` et sur `main` (uniquement si des fichiers frontend changent).
+
 ## Développement local
 
 ```bash
