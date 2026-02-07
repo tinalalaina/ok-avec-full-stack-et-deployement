@@ -1,11 +1,12 @@
 import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 
-const DEFAULT_DEV_API_URL = 'http://127.0.0.1:8000/api'
-const DEFAULT_PROD_API_URL = 'https://ok-avec-full-stack-et-deployement.onrender.com/api'
+const configuredApiUrl = (import.meta.env.VITE_API_URL ?? '').trim()
 
-const fallbackApiUrl = import.meta.env.DEV ? DEFAULT_DEV_API_URL : DEFAULT_PROD_API_URL
-const rawBaseUrl = (import.meta.env.VITE_API_URL ?? fallbackApiUrl).trim()
-const BASE_URL = rawBaseUrl.replace(/\/+$/, '')
+if (!configuredApiUrl) {
+  throw new Error('VITE_API_URL manquant. Configurez-le dans frontend/.env (local) ou frontend/.env.production (production).')
+}
+
+const BASE_URL = configuredApiUrl.replace(/\/+$/, '')
 
 const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
