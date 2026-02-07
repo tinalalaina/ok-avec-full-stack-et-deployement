@@ -7,9 +7,8 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Charge d'abord backend/.env, puis garde la compatibilité avec l'ancien backend/env.
+# Charge uniquement backend/.env (source de vérité unique).
 load_dotenv(BASE_DIR / ".env")
-load_dotenv(BASE_DIR / "env")
 
 
 def env(name: str, default: str = "") -> str:
@@ -90,35 +89,22 @@ sslmode = env("DB_SSLMODE", "require")
 database_url = env("DATABASE_URL")
 if database_url:
     parsed_url = urlparse(database_url)
-    if parsed_url.scheme.startswith("sqlite"):
-        sqlite_path = parsed_url.path or "/db.sqlite3"
-        DATABASES = {
-            "default": {
-                "ENGINE": "django.db.backends.sqlite3",
-                "NAME": sqlite_path,
-            }
-        }
-    else:
-        query = parse_qs(parsed_url.query)
-        sslmode = query.get("sslmode", [sslmode])[0]
-        DATABASES = {
-            "default": {
-                "ENGINE": "django.db.backends.postgresql",
-                "NAME": parsed_url.path.lstrip("/"),
-                "USER": unquote(parsed_url.username or ""),
-                "PASSWORD": unquote(parsed_url.password or ""),
-                "HOST": parsed_url.hostname,
-                "PORT": str(parsed_url.port or "5432"),
-                "OPTIONS": {
-                    "sslmode": sslmode,
-                },
-            }
-        }
-elif env_bool("USE_SQLITE", "True"):
+    if not parsed_url.scheme.startswith("postgres"):
+        raise ValueError("DATABASE_URL doit utiliser PostgreSQL (postgres:// ou postgresql://).")
+
+    query = parse_qs(parsed_url.query)
+    sslmode = query.get("sslmode", [sslmode])[0]
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": parsed_url.path.lstrip("/"),
+            "USER": unquote(parsed_url.username or ""),
+            "PASSWORD": unquote(parsed_url.password or ""),
+            "HOST": parsed_url.hostname,
+            "PORT": str(parsed_url.port or "5432"),
+            "OPTIONS": {
+                "sslmode": sslmode,
+            },
         }
     }
 else:

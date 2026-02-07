@@ -18,6 +18,7 @@ copy_if_missing() {
 
 BACKEND_EXAMPLE="$ROOT_DIR/backend/.env.example"
 BACKEND_ENV="$ROOT_DIR/backend/.env"
+LEGACY_BACKEND_ENV="$ROOT_DIR/backend/env"
 FRONTEND_EXAMPLE="$ROOT_DIR/frontend/.env.example"
 FRONTEND_ENV="$ROOT_DIR/frontend/.env"
 
@@ -42,6 +43,17 @@ PY
 )"
   sed -i "s#^SECRET_KEY=change-me$#SECRET_KEY=${GENERATED_SECRET_KEY}#" "$BACKEND_ENV"
   echo "[ok] SECRET_KEY générée automatiquement dans backend/.env"
+fi
+
+if [[ -f "$LEGACY_BACKEND_ENV" ]]; then
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" =~ ^# ]] && continue
+    key="${line%%=*}"
+    if ! grep -q "^${key}=" "$BACKEND_ENV"; then
+      echo "$line" >> "$BACKEND_ENV"
+      echo "[ok] variable migrée depuis backend/env: $key"
+    fi
+  done < "$LEGACY_BACKEND_ENV"
 fi
 
 echo "\nTerminé. Vérifie ensuite les valeurs de production dans:"
