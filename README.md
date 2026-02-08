@@ -158,7 +158,7 @@ Le script génère aussi automatiquement une `SECRET_KEY` si elle vaut encore `c
 
 ### 10) CI/CD complet
 
-- Push sur `main` → GitHub Actions build & push image (GHCR)
+- Backend : `backend-ghcr.yml` exécute d'abord les checks Django + tests (avec PostgreSQL de service), puis build & push GHCR sur `main`.
 - Koyeb auto‑deploy → redéploiement automatique
 - Cloudflare Pages → rebuild automatique du frontend
 
