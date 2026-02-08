@@ -170,3 +170,19 @@ Le script génère aussi automatiquement une `SECRET_KEY` si elle vaut encore `c
 - Vérifier que les requêtes front → back passent (pas d’erreur CORS)
 - Vérifier que la DB est bien utilisée (pas sqlite)
 - Vérifier les logs Koyeb (migrations, gunicorn OK)
+
+
+---
+
+## DevOps terminé dans ce repo ✅
+
+Les éléments DevOps codés dans ce dépôt sont maintenant en place :
+
+- CI frontend: lint + build (`.github/workflows/frontend-ci.yml`)
+- CI backend: checks + tests + build/push GHCR (`.github/workflows/backend-ghcr.yml`)
+- Sécurité dépendances: `pip-audit` + `npm audit` (`.github/workflows/security.yml`)
+- Endpoint de santé backend: `GET /healthz/`
+- Runbook opérationnel: `docs/DEVOPS_RUNBOOK.md`
+- Script smoke test production: `scripts/devops_smoke_check.sh`
+
+Pour terminer le cycle en environnement réel, configure les secrets/domaine de tes plateformes puis lance un déploiement `main` + smoke check.
