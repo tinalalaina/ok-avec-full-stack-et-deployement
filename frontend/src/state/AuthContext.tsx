@@ -1,22 +1,9 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchUserInfo, login as loginRequest, logout as logoutRequest } from '../api/userService'
-import type { UserInfo, UserRole } from '../types/user'
-
-interface AuthContextValue {
-  user: UserInfo | null
-  role: UserRole | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  error: string | null
-  displayName: string
-  login: (email: string, password: string) => Promise<void>
-  logout: () => Promise<void>
-  refreshUser: () => Promise<UserInfo | null>
-}
-
-export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
+import type { UserInfo } from '../types/user'
+import { AuthContext } from './auth-context'
 
 const getDisplayName = (user: UserInfo | null) => {
   if (!user) {
@@ -42,7 +29,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(info)
       setError(null)
       return info
-    } catch (err) {
+    } catch {
       setUser(null)
       setError('Impossible de charger le profil.')
       return null
@@ -74,9 +61,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           navigate('/dashboard/client', { replace: true })
         }
-      } catch (err) {
+      } catch (error) {
         setError('Identifiants invalides. Merci de réessayer.')
-        throw err
+        throw error
       } finally {
         setIsLoading(false)
       }
@@ -87,7 +74,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = useCallback(async () => {
     try {
       await logoutRequest()
-    } catch (err) {
+    } catch {
       // ignore API errors on logout
     } finally {
       localStorage.removeItem('access_token')

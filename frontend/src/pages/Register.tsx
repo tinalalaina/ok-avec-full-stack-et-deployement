@@ -28,7 +28,7 @@ const Register = () => {
         role,
       })
       navigate('/login')
-    } catch (err) {
+    } catch {
       setMessage('Inscription échouée. Merci de réessayer.')
     }
   }
